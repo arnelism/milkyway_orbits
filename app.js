@@ -1,22 +1,34 @@
-var express = require('express');
-var logger = require('morgan');
-var router = express.Router();
+const express = require('express');
+const logger = require('morgan');
+const mysql = require("mysql");
+const IncidenceService = require("./service/IncidenceService").default;
 
-var app = express();
+const router = express.Router();
+const app = express();
 
-/* GET home page. */
-router.get('/getIncidence', (req, res) => {
-    res.setHeader("Content-Type", "Application/JSON");
-    res.send({foo: Math.random()});
+const conn = mysql.createConnection({
+    host: "orbits.cgktvajsllsj.eu-central-1.rds.amazonaws.com",
+    user: "jebediah",
+    password: 'kerman',
+    database: 'orbits'
 });
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use('/', router);
+conn.connect((err) => {
+    if (err) throw err;
 
+    const service = new IncidenceService(conn);
+    router.get('/getIncidence', (req, res) => {
+        console.log(req.query);
 
+        service.getIncidenceAndBearing(req.query.lat, req.query.lng, req.query.datetime, (data) => {
+            res.setHeader("Content-Type", "Application/JSON");
+            res.send(data);
+        });
+    });
 
-
-
+    app.use(logger('dev'));
+    app.use(express.json());
+    app.use('/', router);
+});
 
 module.exports = app;
