@@ -46,11 +46,15 @@ class IncidenceService {
 
             const answer = [];
             for (const pt of Object.values(pointsByGroup)) {
-                answer.push(
-                    Distances.getNearestPoint(
-                        pt.lat, pt.lng, pt.direction, lat, lng
-                    )
+                const info = Distances.getNearestPoint(
+                    pt.lat, pt.lng, pt.direction, lat, lng
                 );
+                info.id = pt.id;
+                info.utc = pt.utc;
+                info.mission = pt.mission;
+                info.satelliteBearing = pt.direction;
+                info.orbitType = pt.orbit_type;
+                answer.push(info);
             }
 
             return void callback(answer);
