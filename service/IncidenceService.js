@@ -49,12 +49,14 @@ class IncidenceService {
                 const info = Distances.getNearestPoint(
                     pt.lat, pt.lng, pt.direction, lat, lng
                 );
-                info.id = pt.id;
-                info.utc = pt.utc;
-                info.mission = pt.mission;
-                info.satelliteBearing = pt.direction;
-                info.orbitType = pt.orbit_type;
-                answer.push(info);
+                if (info.distance > 400 && info.distance < 800) {
+                    info.id = pt.id;
+                    info.utc = pt.utc;
+                    info.mission = pt.mission;
+                    info.satelliteBearing = pt.direction;
+                    info.orbitType = pt.orbit_type;
+                    answer.push(info);
+                }
             }
 
             return void callback(answer);
@@ -91,6 +93,65 @@ class IncidenceService {
 
         return query;
     }
+
+    getOverflightsGeoJSON(lat, lng, callback) {
+        const geo = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "marker-color": "#c80000",
+                        "marker-size": "medium",
+                        "marker-symbol": "beer"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            Number(lng),
+                            Number(lat)
+                        ]
+                    }
+                }
+            ]
+        };
+        this.getOverflights(lat, lng, (points) => {
+            points.forEach(pt => {
+                const lineEnd = Distances.applyBearingAndDistance(pt.satelliteLatLng.lat, pt.satelliteLatLng.lng, pt.satelliteBearing, 100);
+                geo.features.push({
+                   type: "Feature",
+                   properties: {},
+                   geometry: {
+                       type: "LineString",
+                       coordinates: [
+                           [pt.satelliteLatLng.lng, pt.satelliteLatLng.lat],
+                           [lineEnd.lng, lineEnd.lat],
+                       ]
+                   }
+                });
+                geo.features.push({
+                    "type": "Feature",
+                    "properties": {
+                        "marker-color": "#00a700",
+                        "marker-size": "medium",
+                        "marker-symbol": "rocket",
+                        "UTC": pt.utc,
+                        "distance": pt.distance
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            pt.satelliteLatLng.lng,
+                            pt.satelliteLatLng.lat
+                        ]
+                    }
+                });
+            });
+        callback(geo);
+        });
+    }
+
+
 }
 
 exports.default = IncidenceService;

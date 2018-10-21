@@ -33,6 +33,14 @@ conn.connect((err) => {
         });
     });
 
+    router.get('/getOverflightsGeoJSON', (req, res) => {
+
+        service.getOverflightsGeoJSON(req.query.lat, req.query.lng, (data) => {
+            res.setHeader("Content-Type", "Application/JSON");
+            res.send(data);
+        });
+    });
+
     app.use(logger('dev'));
     app.use(express.json());
     app.use('/', router);

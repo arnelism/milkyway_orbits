@@ -3,8 +3,9 @@ module.exports = class Distances {
     static getNearestPoint(satLat, satLng, satBearing, objLat, objLng) {
         let minDistance = Number.MAX_SAFE_INTEGER;
         let lastLatLng = null;
-        for (let distance=0; distance<100; distance++) {
-            const latLng = this.applyBearingAndDistance(satLat, satLng, satBearing, distance);
+        const sl = this.applyBearingAndDistance(satLat, satLng, satBearing, -1000);
+        for (let distance=0; distance<2000; distance+=10) {
+            const latLng = this.applyBearingAndDistance(sl.lat, sl.lng, satBearing, distance);
             const distanceFromObj = this.getDistance(objLat, objLng, latLng.lat, latLng.lng);
             if (lastLatLng != null && distanceFromObj > minDistance ) {
                 break;
