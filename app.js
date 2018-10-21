@@ -18,9 +18,16 @@ conn.connect((err) => {
 
     const service = new IncidenceService(conn);
     router.get('/getIncidence', (req, res) => {
-        console.log(req.query);
 
         service.getIncidenceAndBearing(req.query.lat, req.query.lng, req.query.datetime, (data) => {
+            res.setHeader("Content-Type", "Application/JSON");
+            res.send(data);
+        });
+    });
+
+    router.get('/getOverflights', (req, res) => {
+
+        service.getOverflights(req.query.lat, req.query.lng, (data) => {
             res.setHeader("Content-Type", "Application/JSON");
             res.send(data);
         });
